@@ -23,13 +23,15 @@
 (defconst version-control-packages
   '(
     browse-at-remote
-    (diff-hl            :toggle (eq 'diff-hl version-control-diff-tool))
+    ;; Git-gutter+ is not longer maintained and will break with latest magit version
+    ;; therefore we switch to diff-hl for users which have configered git-gutter+ to avoid
+    ;; breaking there config.
+    (diff-hl            :toggle (or (eq 'diff-hl version-control-diff-tool)
+                                    (eq 'git-gutter+ version-control-diff-tool)))
     diff-mode
     evil-unimpaired
     (git-gutter         :toggle (eq 'git-gutter version-control-diff-tool))
     (git-gutter-fringe  :toggle (eq 'git-gutter version-control-diff-tool))
-    (git-gutter+        :toggle (eq 'git-gutter+ version-control-diff-tool))
-    (git-gutter-fringe+ :toggle (eq 'git-gutter+ version-control-diff-tool))
     (smerge-mode :location built-in)
     (vc :location built-in)))
 
@@ -46,6 +48,7 @@
       "gve" 'vc-ediff
       "gvd" 'vc-dir
       "gv+" 'vc-update
+      "gvh" 'vc-region-history
       "gvi" 'vc-register
       "gvI" 'vc-ignore
       "gvu" 'vc-revert
@@ -99,14 +102,14 @@
         :eval-after-load vc-hg))
     (with-eval-after-load 'vc-annotate
       (evilified-state-evilify-map vc-annotate-mode-map
-       :mode vc-annotate-mode
-       :bindings
-       "J" 'vc-annotate-next-revision
-       "K" 'vc-annotate-prev-revision
-       "L" 'vc-annotate-show-log-revision-at-line
-       "H" 'vc-annotate-toggle-annotation-visibility
-       "a" 'vc-annotate-revision-at-line
-       "p" 'vc-annotate-revision-previous-to-line))))
+        :mode vc-annotate-mode
+        :bindings
+        "J" 'vc-annotate-next-revision
+        "K" 'vc-annotate-prev-revision
+        "L" 'vc-annotate-show-log-revision-at-line
+        "H" 'vc-annotate-toggle-annotation-visibility
+        "a" 'vc-annotate-revision-at-line
+        "p" 'vc-annotate-revision-previous-to-line))))
 
 (defun version-control/init-diff-mode ()
   (use-package diff-mode
@@ -193,61 +196,6 @@
     (setq git-gutter-fr:side (if (eq version-control-diff-side 'left)
                                  'left-fringe 'right-fringe))))
 
-(defun version-control/init-git-gutter+ ()
-  (use-package git-gutter+
-    :if (eq version-control-diff-tool 'git-gutter+)
-    :defer t
-    :init
-    ;; If you enable global minor mode
-    (when version-control-global-margin
-      (add-hook 'magit-pre-refresh-hook
-                #'spacemacs//git-gutter+-refresh-in-all-buffers)
-      (run-with-idle-timer 1 nil 'global-git-gutter+-mode))
-    (setq
-     git-gutter+-modified-sign " "
-     git-gutter+-added-sign "+"
-     git-gutter+-deleted-sign "-"
-     git-gutter+-diff-option "-w"
-     git-gutter+-hide-gutter t)
-    ;; identify magit changes
-    :config
-    (spacemacs|hide-lighter git-gutter+-mode)
-    ;; Do not activate git-gutter in pdf-view-mode, see #15106
-    (when (configuration-layer/layer-used-p 'pdf)
-      (add-to-list 'git-gutter+-disabled-modes 'pdf-view-mode))))
-
-(defun version-control/init-git-gutter-fringe+ ()
-  (use-package git-gutter-fringe+
-    :defer t
-    :init
-    (spacemacs|do-after-display-system-init
-     (with-eval-after-load 'git-gutter+
-       (require 'git-gutter-fringe+)))
-    (setq git-gutter-fr+-side (if (eq version-control-diff-side 'left)
-                                  'left-fringe 'right-fringe))
-    :config
-    ;; custom graphics that works nice with half-width fringes
-    (fringe-helper-define 'git-gutter-fr+-added nil
-      "..X...."
-      "..X...."
-      "XXXXX.."
-      "..X...."
-      "..X....")
-
-    (fringe-helper-define 'git-gutter-fr+-deleted nil
-      "......."
-      "......."
-      "XXXXX.."
-      "......."
-      ".......")
-
-    (fringe-helper-define 'git-gutter-fr+-modified nil
-      "..X...."
-      ".XXX..."
-      "XX.XX.."
-      ".XXX..."
-      "..X....")))
-
 (defun version-control/init-smerge-mode ()
   (use-package smerge-mode
     :defer t
@@ -261,9 +209,9 @@
  Movement^^^^             Merge Action^^      Diff^^            Other
  -------------------^^^^  ----------------^^  --------------^^  -------------------------------^^
  [_n_]^^   next conflict  [_u_] keep upper    [_<_] base/upper  [_C_] combine curr/next conflicts
- [_N_/_p_] prev conflict  [_b_] keep base     [_=_] upper/lower [_U_] undo
- [_j_]^^   next line      [_l_] keep lower    [_>_] base/lower  [_q_] quit
- [_k_]^^   prev line      [_a_] keep all      [_r_] refine
+ [_N_/_p_] prev conflict  [_b_] keep base     [_=_] upper/lower [_s_] swap upper/lower
+ [_j_]^^   next line      [_l_] keep lower    [_>_] base/lower  [_U_] undo
+ [_k_]^^   prev line      [_a_] keep all      [_r_] refine      [_q_] quit
  ^^^^                     [_c_] keep current  [_e_] ediff       [_?_] toggle help
  ^^^^                     [_K_] kill current")
     (spacemacs|define-transient-state smerge
@@ -288,6 +236,8 @@
       ("l" smerge-keep-lower)
       ("u" smerge-keep-upper)
       ("c" smerge-keep-current)
+      ("K" smerge-kill-current)
+      ("s" smerge-swap)
       ;; diff
       ("<" smerge-diff-base-mine)
       ("=" smerge-diff-mine-other)
@@ -296,8 +246,7 @@
       ("e" smerge-ediff :exit t)
       ;; other
       ("C" smerge-combine-with-next)
-      ("K" smerge-kill-current)
-      ("U" undo-tree-undo)
+      ("U" evil-undo)
       ("q" nil :exit t)
       ("?" spacemacs//smerge-ts-toggle-hint))))
 

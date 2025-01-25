@@ -1,8 +1,8 @@
-;;; funcs.el --- ipython-notebook Layer Configuration File for Spacemacs
+;;; layers.el --- Swift Layer layers File for Spacemacs
 ;;
 ;; Copyright (c) 2012-2024 Sylvain Benner & Contributors
 ;;
-;; Author: Senghoo Kim <me@senghoo.com>
+;; Author: Maxi Wolff <smile13241324@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;;
 ;; This file is not part of GNU Emacs.
@@ -20,10 +20,6 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-(defvar ein-backend nil
-  "The backend to use for IDE features.
-Possible values are `jupyter' and `nil'.
-If `jupyter' then the API provided by jupyter will be used.
-If `nil' the ide feature will not be enabled.")
-
+(when (and (boundp 'swift-backend)
+           (eq swift-backend 'lsp))
+  (configuration-layer/declare-layer-dependencies '(lsp)))

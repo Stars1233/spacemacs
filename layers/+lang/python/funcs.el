@@ -157,13 +157,9 @@ ROOT-DIR should be the directory path for the environment, `nil' for clean up."
             (equal python-shell-interpreter spacemacs--python-shell-interpreter-origin))
     (if-let* ((default-directory root-dir))
         (if-let* ((ipython (cl-find-if 'spacemacs/pyenv-executable-find
-                                       '("ipython3" "ipython")))
-                  (version (replace-regexp-in-string
-                            "\\(\\.dev\\)?[\r\n|\n]$" ""
-                            (shell-command-to-string (format "\"%s\" --version" ipython)))))
+                                       '("ipython3" "ipython"))))
             (setq-local python-shell-interpreter ipython
-                        python-shell-interpreter-args
-                        (concat "-i" (unless (version< version "5") " --simple-prompt")))
+                        python-shell-interpreter-args "-i --simple-prompt")
           ;; else try python3 or python
           (setq-local python-shell-interpreter
                       (or (cl-find-if 'spacemacs/pyenv-executable-find
@@ -181,7 +177,7 @@ ROOT-DIR should be the path for the environemnt, `nil' for clean up"
     (if-let* ((root-dir)
               (default-directory root-dir))
         (dolist (x '("pylint" "flake8"))
-          (when-let ((exe (spacemacs/pyenv-executable-find x)))
+          (when-let* ((exe (spacemacs/pyenv-executable-find x)))
             (flycheck-set-checker-executable (concat "python-" x) exe)))
       ;; else root-dir is nil
       (dolist (x '("pylint" "flake8"))
@@ -206,14 +202,21 @@ ROOT-DIR should be the path for the environemnt, `nil' for clean up"
                      ((spacemacs/pyenv-executable-find "python3.10") "breakpoint()")
                      ((spacemacs/pyenv-executable-find "python3.11") "breakpoint()")
                      (t "import pdb; pdb.set_trace()")))
+        (prev-line (save-excursion
+                     (and (zerop (forward-line -1))
+                          (thing-at-point 'line))))
         (line (thing-at-point 'line)))
-    (if (and line (string-match trace line))
-        (kill-whole-line)
-      (progn
-        (back-to-indentation)
-        (insert trace)
-        (insert "\n")
-        (python-indent-line)))))
+    (cond ((and line (string-search trace line))
+           (kill-whole-line)
+           (back-to-indentation))
+          ((and prev-line (string-search trace prev-line))
+           (forward-line -1)
+           (kill-whole-line)
+           (back-to-indentation))
+          (t
+           (back-to-indentation)
+           (insert trace ?\n)
+           (python-indent-line)))))
 
 ;; from https://www.snip2code.com/Snippet/127022/Emacs-auto-remove-unused-import-statemen
 (defun spacemacs/python-remove-unused-imports ()
@@ -271,20 +274,9 @@ location of \".venv\" file, then relative to pyvenv-workon-home()."
                       (setq-local pyvenv-activate virtualenv-abs-path))
                      (t (pyvenv-workon virtualenv-path-in-file)
                         (setq-local pyvenv-workon virtualenv-path-in-file))))))))
+
 
 ;; Tests
-
-(defun spacemacs//python-imenu-create-index-use-semantic-maybe ()
-  "Use semantic if the layer is enabled."
-  (setq imenu-create-index-function 'spacemacs/python-imenu-create-index))
-
-;; fix for issue #2569 (https://github.com/syl20bnr/spacemacs/issues/2569) and
-;; Emacs 24.5 and older. use `semantic-create-imenu-index' only when
-;; `semantic-mode' is enabled, otherwise use `python-imenu-create-index'
-(defun spacemacs/python-imenu-create-index ()
-  (if (bound-and-true-p semantic-mode)
-      (semantic-create-imenu-index)
-    (python-imenu-create-index)))
 
 (defun spacemacs//python-get-main-testrunner ()
   "Get the main test runner."
@@ -421,6 +413,28 @@ Bind formatter to '==' for LSP and '='for all other backends."
     ('lsp (lsp-format-buffer))
     (code (message "Unknown formatter: %S" code))))
 
+(defun spacemacs//python-lsp-set-up-format-on-save ()
+  (when (and python-format-on-save
+             (eq python-formatter 'lsp))
+    (add-hook
+     'python-mode-hook
+     'spacemacs//python-lsp-set-up-format-on-save-local)))
+
+(defun spacemacs//python-lsp-set-up-format-on-save-local ()
+  (add-hook 'before-save-hook 'spacemacs//python-lsp-format-on-save nil t))
+
+(defun spacemacs//python-lsp-format-on-save ()
+  (condition-case err
+      (when (and python-format-on-save
+                 (eq python-formatter 'lsp))
+        (lsp-format-buffer))
+    (lsp-capability-not-supported
+     (display-warning
+       '(spacemacs python)
+       "Configuration error: `python-formatter' is `lsp', no active workspace supports textDocument/formatting"
+       :error))))
+
+
 
 ;; REPL
 (defun spacemacs/python-shell-send-block (&optional arg)
@@ -530,8 +544,8 @@ If region is not active then send line."
 (defun spacemacs/python-start-or-switch-repl ()
   "Start and/or switch to the REPL."
   (interactive)
-  (if-let ((shell-process (or (python-shell-get-process)
-                              (call-interactively #'run-python))))
+  (if-let* ((shell-process (or (python-shell-get-process)
+                               (call-interactively #'run-python))))
       (progn
         (pop-to-buffer (process-buffer shell-process))
         (evil-insert-state))

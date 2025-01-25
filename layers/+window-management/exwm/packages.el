@@ -27,7 +27,7 @@
                      :location (recipe :fetcher github
                                        :repo "domenzain/evil-exwm-state"))
     (exwm :step pre)
-    (helm-exwm :toggle (configuration-layer/package-used-p 'helm))
+    (helm-exwm :requires helm)
     (xdg :location built-in)
     (xelb :step pre)))
 
@@ -81,7 +81,7 @@
     (use-dialog-box nil "Disable dialog boxes since they are unusable in EXWM")
     (exwm-input-line-mode-passthrough t "Pass all keypresses to emacs in line mode.")
     :init
-    (require 'exwm-config)
+    (exwm-enable)
     ;; "Number of workspaces. Defaults to the number of connected displays."
     (unless exwm-workspace-number
       (custom-set-variables '(exwm-workspace-number (/ (length exwm--randr-displays) 2))))

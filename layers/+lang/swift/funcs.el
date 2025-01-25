@@ -1,8 +1,8 @@
-;;; funcs.el --- ipython-notebook Layer Configuration File for Spacemacs
+;;; funcs.el --- Swift functions File for Spacemacs
 ;;
 ;; Copyright (c) 2012-2024 Sylvain Benner & Contributors
 ;;
-;; Author: Senghoo Kim <me@senghoo.com>
+;; Author: Maxi Wolff <smile13241324@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;;
 ;; This file is not part of GNU Emacs.
@@ -21,9 +21,16 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-(defvar ein-backend nil
-  "The backend to use for IDE features.
-Possible values are `jupyter' and `nil'.
-If `jupyter' then the API provided by jupyter will be used.
-If `nil' the ide feature will not be enabled.")
+(defun spacemacs//swift-setup-company ()
+  "Conditionally setup company based on backend."
+  (pcase swift-backend
+    ;; Activate lsp company explicitly to activate
+    ;; standard backends as well
+    ('lsp (spacemacs|add-company-backends
+            :backends company-capf
+            :modes swift-mode))))
 
+(defun spacemacs//swift-setup-backend ()
+  "Conditionally setup swift backend."
+  (when (eq swift-backend 'lsp)
+    (lsp-deferred)))

@@ -1,8 +1,8 @@
-;;; funcs.el --- ipython-notebook Layer Configuration File for Spacemacs
+;;; funcs.el --- GitHub Copilot Layer functions file for Spacemacs -*- lexical-binding: t; -*-
 ;;
-;; Copyright (c) 2012-2024 Sylvain Benner & Contributors
+;; Copyright (c) 2024 Sylvain Benner & Contributors
 ;;
-;; Author: Senghoo Kim <me@senghoo.com>
+;; Author: Ferdinand Nussbaum <ferdinand.nussbaum@inf.ethz.ch>
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;;
 ;; This file is not part of GNU Emacs.
@@ -20,10 +20,10 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-(defvar ein-backend nil
-  "The backend to use for IDE features.
-Possible values are `jupyter' and `nil'.
-If `jupyter' then the API provided by jupyter will be used.
-If `nil' the ide feature will not be enabled.")
-
+(defun spacemacs//copilot-enable-predicate ()
+  "Copilot is by default only enabled in `evil-insert-state', not in `evil-emacs-state',
+see the default value of `copilot-enable-predicates'.
+In `holy-mode', we enable `evil-emacs-state' permanently, hence this workaround."
+  (or (not (bound-and-true-p evil-local-mode))
+      (bound-and-true-p holy-mode)
+      (evil-insert-state-p)))

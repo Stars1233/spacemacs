@@ -1,24 +1,24 @@
 <a name="top" id="fork-destination-box"></a>
-<a href="https://develop.spacemacs.org"><img src="assets/spacemacs-badge.svg" alt="Made with Spacemacs" height="20"></a>
+<a href="https://spacemacs.org"><img src="assets/spacemacs-badge.svg" alt="Made with Spacemacs" height="20"></a>
 <a href="https://www.gnu.org/licenses/gpl-3.0.en.html"><img src="assets/gplv3.png" alt="GPLv3 Software" align="right" height="20"></a>
 <a href="https://www.twitter.com/spacemacs"><img src="https://i.imgur.com/tXSoThF.png" alt="Twitter" align="right" height="20"></a>
 
 <!-- logo and links -->
 <p align="center"><img src="doc/img/title2.png" alt="Spacemacs"/></p>
 <p align="center">
-<b><a href="https://develop.spacemacs.org/doc/DOCUMENTATION#core-pillars">philosophy</a></b>
+<b><a href="https://spacemacs.org/doc/DOCUMENTATION#core-pillars">philosophy</a></b>
 |
-<b><a href="https://develop.spacemacs.org/doc/DOCUMENTATION#who-can-benefit-from-this">for whom?</a></b>
+<b><a href="https://spacemacs.org/doc/DOCUMENTATION#who-can-benefit-from-this">for whom?</a></b>
 |
-<b><a href="https://develop.spacemacs.org/doc/DOCUMENTATION#screenshots">screenshots</a></b>
+<b><a href="https://spacemacs.org/doc/DOCUMENTATION#screenshots">screenshots</a></b>
 |
-<b><a href="https://develop.spacemacs.org/doc/DOCUMENTATION.html">documentation</a></b>
+<b><a href="https://spacemacs.org/doc/DOCUMENTATION.html">documentation</a></b>
 |
 <b><a href="CONTRIBUTING.org">contribute</a></b>
 |
-<b><a href="https://develop.spacemacs.org/doc/DOCUMENTATION#achievements">achievements</a></b>
+<b><a href="https://spacemacs.org/doc/DOCUMENTATION#achievements">achievements</a></b>
 |
-<b><a href="https://develop.spacemacs.org/doc/FAQ">FAQ</a></b>
+<b><a href="https://spacemacs.org/doc/FAQ">FAQ</a></b>
 </p>
 
 
@@ -220,6 +220,14 @@ Last but not least there are a lot of high class tutorials available on YouTube:
       brew install emacs-plus --with-spacemacs-icon --with-native-comp
       ```
 
+      You will require the latest version of Xcode Command Line tools, which can be
+      downloaded from the [Apple Developer Portal](https://developer.apple.com/download/all/)
+      or by running the following command:
+
+      ```sh
+      softwareupdate --all --install --force
+      ```
+
    2. [Emacs Mac Port][] adds native GUI support to Emacs 28. And the full list
       of features is available [here][Emacs Mac Port features].
 
@@ -353,15 +361,15 @@ If you need to follow that path we recommend to at least use a package manager l
     or in PowerShell:
 
     ```powershell
-    if( TestPath -Path $HOME/.emacs.d )
+    if( Test-Path -Path $HOME/.emacs.d )
     {
         Rename-Item $HOME/.emacs.d $HOME/.emacs.d.bak
     }
-    if( TestPath -Path $HOME/.emacs.el )
+    if( Test-Path -Path $HOME/.emacs.el )
     {
         Rename-Item $HOME/.emacs.el $HOME/.emacs.el.bak
     }
-    if( TestPath -Path $HOME/.emacs )
+    if( Test-Path -Path $HOME/.emacs )
     {
         Rename-Item $HOME/.emacs $HOME/.emacs.bak
     }
@@ -457,10 +465,9 @@ Dock][icon-mac-instructions].
 ## Notes
 
 - Depending on the installed version of GnuTLS, securely installing Emacs
-  packages may fail. It may also fail if you have a bad internet environment.
-  In either case it is possible to install packages using `emacs --insecure`.
-  However be aware that this means your packages will be transferred using HTTP,
-  use at your own risk.
+  packages may fail. If this happens to you please update your OS and Emacs.
+  If you are behind a company proxy please trust the company firewall cert.
+  We do not longer support disabling https due to security reasons.
 
 - (*Windows)* If the following error occurs after starting Emacs:
 
@@ -507,7 +514,7 @@ Packages]` button, or use the convenient keybinding <kbd>SPC f e U</kbd>**
 
 If you are still on the old `master` branch (i.e., if
 `git branch --show-current` shows `master` instead of `develop`),
-you need to [upgrade to `develop`](https://practical.li/spacemacs/install-spacemacs/switch-to-develop/)
+you need to [upgrade to `develop`](https://practical.li/spacemacs/reference/switch-to-develop/)
 first.
 
 # Quotes
@@ -572,24 +579,24 @@ badge](#top).
 
 If you used Spacemacs in a project, and you want to show that fact, you can use
 the Spacemacs badge: [![Built with
-Spacemacs](https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg)](https://develop.spacemacs.org)
+Spacemacs](https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg)](https://spacemacs.org)
 
 - For Markdown:
 
    ```markdown
-   [![Built with Spacemacs](https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg)](https://develop.spacemacs.org)
+   [![Built with Spacemacs](https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg)](https://spacemacs.org)
    ```
 
 - For HTML:
 
    ```html
-   <a href="https://develop.spacemacs.org"><img alt="Built with Spacemacs" src="https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg" /></a>
+   <a href="https://spacemacs.org"><img alt="Built with Spacemacs" src="https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg" /></a>
    ```
 
 - For Org-mode:
 
    ```org
-   [[https://develop.spacemacs.org][file:https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg]]
+   [[https://spacemacs.org][file:https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg]]
    ```
 
 Thank you!
