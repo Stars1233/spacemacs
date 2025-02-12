@@ -39,42 +39,40 @@
     realgud
     semantic
     srefactor
-    stickyfunc-enhance
     xcscope
     ;; lsp
-    (ccls :requires lsp-mode)
+    (ccls :requires lsp-mode :toggle (eq c-c++-backend 'lsp-ccls))
     dap-mode
     ;; rtags
     (company-rtags :requires (company rtags))
-    counsel-gtags
     (flycheck-rtags :requires (flycheck rtags))
     ggtags
     (helm-rtags :requires (helm rtags))
     (ivy-rtags :requires (ivy rtags))
-    rtags
+    (rtags :toggle (eq c-c++-backend 'rtags))
     ;; ycmd
-    (company-ycmd :requires company)
-    (flycheck-ycmd :requires flycheck)
+    (company-ycmd :requires (company ycmd))
+    (flycheck-ycmd :requires (flycheck ycmd))
     (gendoxy :location (recipe
                         :fetcher github
                         :repo "cormacc/gendoxy"
                         :branch "provides"))
-    ycmd))
+    (ycmd :toggle (eq c-c++-backend 'ycmd))))
 
 (defun c-c++/init-gendoxy ()
   "Initialise gendoxy (doxygen package)"
   (use-package gendoxy
     :defer t
     :init (dolist (mode c-c++-modes)
-              (spacemacs/declare-prefix-for-mode mode "mi" "insert")
-              (spacemacs/set-leader-keys-for-major-mode mode
-                "ih" 'gendoxy-header
-                "id" 'gendoxy-tag
-                "iD" 'gendoxy-tag-header
-                "ig" 'gendoxy-group
-                "iG" 'gendoxy-group-header
-                "is" 'gendoxy-group-start
-                "ie" 'gendoxy-group-end))))
+            (spacemacs/declare-prefix-for-mode mode "mi" "insert")
+            (spacemacs/set-leader-keys-for-major-mode mode
+              "ih" 'gendoxy-header
+              "id" 'gendoxy-tag
+              "iD" 'gendoxy-tag-header
+              "ig" 'gendoxy-group
+              "iG" 'gendoxy-group-header
+              "is" 'gendoxy-group-start
+              "ie" 'gendoxy-group-end))))
 
 (defun c-c++/init-cc-mode ()
   (use-package cc-mode
@@ -126,8 +124,6 @@
   (use-package company-ycmd
     :defer t
     :commands company-ycmd))
-
-(defun c-c++/post-init-counsel-gtags nil)
 
 (defun c-c++/init-cpp-auto-include ()
   (use-package cpp-auto-include
@@ -245,9 +241,6 @@
   (dolist (mode c-c++-modes)
     (spacemacs/set-leader-keys-for-major-mode mode "r." 'srefactor-refactor-at-point))
   (spacemacs/add-to-hooks 'spacemacs/load-srefactor c-c++-mode-hooks))
-
-(defun c-c++/post-init-stickyfunc-enhance ()
-  (spacemacs/add-to-hooks 'spacemacs/load-stickyfunc-enhance c-c++-mode-hooks))
 
 (defun c-c++/pre-init-xcscope ()
   (spacemacs|use-package-add-hook xcscope

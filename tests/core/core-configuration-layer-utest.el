@@ -899,12 +899,6 @@
     (should (equal '(("melpa" . "https://melpa.org/packages/"))
                    (configuration-layer//resolve-package-archives input)))))
 
-(ert-deftest test-resolve-package-archives--simple-http ()
-  (let ((input '(("melpa" . "melpa.org/packages/")))
-        dotspacemacs-elpa-https)
-    (should (equal '(("melpa" . "http://melpa.org/packages/"))
-                   (configuration-layer//resolve-package-archives input)))))
-
 (ert-deftest test-resolve-package-archives--idempotent-when-already-http-prefix ()
   (let ((input '(("melpa"   . "http://melpa.org/packages/")))
         (dotspacemacs-elpa-https t))
@@ -2166,7 +2160,7 @@
     (configuration-layer/make-packages-from-layers '(layer-dotfile-2) 'used)
     (configuration-layer/make-packages-from-dotfile 'used)
     (should
-     (equal (cfgl-package "pkg1" :name 'pkg1 :owners '(layer-dotfile-2))
+     (equal (cfgl-package "pkg1" :name 'pkg1 :owners '(layer-dotfile-2 dotfile))
             (spacemacs-ht-get configuration-layer--indexed-packages 'pkg1)))))
 
 (ert-deftest test-make-packages-from-dotfile--dotfile-excludes-pkg2-in-layer-11 ()

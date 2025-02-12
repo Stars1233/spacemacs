@@ -27,9 +27,10 @@
     (common-lisp-snippets :requires yasnippet)
     evil
     evil-cleverparens
+    evil-collection
     ggtags
-    counsel-gtags
     helm
+    org
     rainbow-identifiers
     slime
     (slime-company :requires company)))
@@ -58,6 +59,10 @@
       (add-to-list 'evil-lisp-safe-structural-editing-modes 'common-lisp-mode)
       (add-to-list 'evil-lisp-safe-structural-editing-modes 'lisp-mode))))
 
+(defun common-lisp/pre-init-evil-collection ()
+  (when (spacemacs//support-evilified-buffer-p)
+    (add-to-list 'spacemacs-evil-collection-allowed-list 'slime)))
+
 (defun common-lisp/post-init-helm ()
   (spacemacs/set-leader-keys-for-major-mode 'lisp-mode
     "sI" 'spacemacs/helm-slime))
@@ -65,7 +70,9 @@
 (defun common-lisp/post-init-ggtags ()
   (add-hook 'common-lisp-mode-local-vars-hook #'spacemacs/ggtags-mode-enable))
 
-(defun common-lisp/post-init-counsel-gtags nil)
+(defun common-lisp/pre-init-org ()
+  (spacemacs|use-package-add-hook org
+    :post-config (add-to-list 'org-babel-load-languages '(lisp . t))))
 
 (defun common-lisp/post-init-rainbow-identifiers ()
   (add-hook 'lisp-mode-hook #'colors//rainbow-identifiers-ignore-keywords))
@@ -96,7 +103,6 @@
     (spacemacs/add-to-hooks 'slime-mode '(lisp-mode-hook))
     :config
     (slime-setup)
-    ;; TODO: Add bindings for the SLIME debugger?
     (spacemacs/set-leader-keys-for-major-mode 'lisp-mode
       "'" 'spacemacs/slime-repl
 
@@ -129,7 +135,8 @@
       "hT" 'slime-untrace-all
       "h<" 'slime-who-calls
       "h>" 'slime-calls-who
-      ;; TODO: Add key bindings for who binds/sets globals?
+      "hS" 'slime-who-sets
+      "hb" 'slime-who-binds
       "hr" 'slime-who-references
       "hm" 'slime-who-macroexpands
       "hs" 'slime-who-specializes

@@ -73,7 +73,7 @@ For evil states that also need an entry to `spacemacs-evil-cursors' use
            :group 'spacemacs))
   ;; 'unspecified may not be used in defface, so set it via set-face-attribute.
   (set-face-attribute (spacemacs/state-color-face (intern state)) nil
-       :foreground (face-attribute 'mode-line :background)))
+                      :foreground (face-attribute 'mode-line :background)))
 
 (defun spacemacs/set-state-faces ()
   (let ((ml-bg (face-attribute 'mode-line :background)))
@@ -173,17 +173,23 @@ START-REGEXP and END-REGEXP are the boundaries of the text object."
   (defmacro evil-map (state key seq)
     "Map for a given STATE a KEY to a sequence SEQ of keys.
 
-Can handle recursive definition only if KEY is the first key of SEQ.
+Can handle recursive definition only if KEY is the first key of
+SEQ, and if KEY's binding in STATE is defined as a symbol in
+`evil-normal-state-map'.
 Example: (evil-map visual \"<\" \"<gv\")"
-    (let ((map (intern (format "evil-%S-state-map" state))))
+    (let ((map (intern (format "evil-%S-state-map" state)))
+          (key-cmd (lookup-key evil-normal-state-map key)))
       `(define-key ,map ,key
-         (lambda ()
-           (interactive)
-           ,(if (string-equal key (substring seq 0 1))
-                `(progn
-                   (call-interactively ',(lookup-key evil-normal-state-map key))
-                   (execute-kbd-macro ,(substring seq 1)))
-              (execute-kbd-macro ,seq)))))))
+                   (lambda ()
+                     (interactive)
+                     ,(if (string-equal key (substring seq 0 1))
+                          `(let ((orig-this-command this-command))
+                             (setq this-command ',key-cmd)
+                             (call-interactively ',key-cmd)
+                             (run-hooks 'post-command-hook)
+                             (setq this-command orig-this-command)
+                             (execute-kbd-macro ,(substring seq 1)))
+                        (execute-kbd-macro ,seq)))))))
 
 (defun spacemacs/diminish-hook (_)
   "Display diminished lighter in vanilla Emacs mode-line."
@@ -242,16 +248,7 @@ column."
 
 
 
-(defun spacemacs/toggle-evil-mouse-drag-for-artist-mode (orig-fun &rest args)
-   "Toggle evil binding `evil-mode-drag-region' for `artist-mode'.
-
- When a buffer is placed into `artist-mode', <down-mouse-1> is supposed to
- bound to run the command `artist-down-mouse-1', while it is already bound
- to `evil-motion-state-map'. Thus it should be unbound so that mouse commands
- `down-mouse-1' operate correctly."
-   (let ((was-active artist-mode))
-     (apply orig-fun args)
-     (unless (eq was-active artist-mode)
-       (if artist-mode
-           (define-key evil-motion-state-map [down-mouse-1] nil)
-         (define-key evil-motion-state-map [down-mouse-1] 'evil-mouse-drag-region)))))
+(defun spacemacs/not-in-pdf-view-mode (orig-fun &rest args)
+  "Disable bound function when in `pdf-view-mode'."
+  (unless (eq major-mode 'pdf-view-mode)
+    (apply orig-fun args)))

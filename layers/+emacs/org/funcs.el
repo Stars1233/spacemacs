@@ -38,15 +38,15 @@
 
 
 
-(defun org-projectile/capture (&optional arg)
+(defun spacemacs/org-project-capture-capture (&optional arg)
   (interactive "P")
   (if arg
-      (org-projectile-project-todo-completing-read :empty-lines 1)
-    (org-projectile-capture-for-current-project :empty-lines 1)))
+      (org-project-capture-project-todo-completing-read :empty-lines 1)
+    (org-project-capture-capture-for-current-project :empty-lines 1)))
 
-(defun org-projectile/goto-todos ()
+(defun spacemacs/org-project-capture-goto-todos ()
   (interactive)
-  (org-projectile-goto-location-for-project (projectile-project-name)))
+  (org-project-capture-goto-location-for-project (projectile-project-name)))
 
 
 
@@ -133,3 +133,11 @@ For example: To unfold from a magit diff buffer, evaluate the following:
                (and (org-entry-is-done-p) (> n-not-done 0)))
            ;; then prompt to change the state
            (org-todo))))
+
+
+
+
+(defun spacemacs/with-save-excursion (orig-fun &rest args)
+  "Execute the given function with save excursion."
+  (save-excursion
+    (apply orig-fun args)))
